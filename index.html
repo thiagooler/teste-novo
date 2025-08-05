@@ -3,44 +3,255 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Galerias</title>
+    <title>Seleção de Fotos - Seu Nome</title>
     <style>
-        body { font-family: sans-serif; background-color: #f0f0f0; padding: 20px; }
-        .container { max-width: 800px; margin: auto; background: #fff; padding: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        h1, h2 { text-align: center; color: #333; }
-        #drop-area { border: 2px dashed #ccc; border-radius: 20px; padding: 50px; text-align: center; color: #888; cursor: pointer; transition: border-color 0.3s; }
-        #drop-area.highlight { border-color: #333; }
-        #drop-area p { margin: 0; }
-        #fileElem { display: none; }
-        .options { margin-top: 20px; text-align: center; }
-        .options label { margin-right: 20px; font-weight: bold; }
-        #download-btn { display: none; width: 100%; padding: 15px; margin-top: 20px; background-color: #007bff; color: white; border: none; font-size: 1.2em; cursor: pointer; border-radius: 8px; }
-        #download-btn:hover { background-color: #0056b3; }
-        #progress-container { display: none; width: 100%; height: 30px; background-color: #e0e0e0; border-radius: 15px; overflow: hidden; margin-top: 20px; }
-        #progress-bar { width: 0%; height: 100%; background-color: #4CAF50; text-align: center; line-height: 30px; color: white; transition: width 0.3s; }
-    </style>
+        body{font-family:sans-serif;background-color:#f7f7f7;padding:20px}.header{text-align:center;margin-bottom:30px}.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:15px}.photo-item{border:1px solid #ccc;overflow:hidden;cursor:pointer;transition:transform .3s;position:relative}.photo-item.selected{border:4px solid #28a745}.photo-item img{width:100%;height:auto;display:block}.photo-item:hover{transform:scale(1.05)}.filename{position:absolute;bottom:0;left:0;width:100%;background:rgba(0,0,0,.6);color:#fff;padding:5px;font-size:.8em;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background-color:rgba(0,0,0,.9);overflow-y:auto;display:flex;align-items:center;justify-content:center;flex-direction:column}.modal.show{display:flex}.modal-content{background-color:#fff;padding:20px;border-radius:8px;max-width:90%;max-height:90vh;position:relative;text-align:center}.modal-content img{max-width:100%;max-height:100%;display:block;margin:auto}.close-btn{color:#000;font-size:30px;font-weight:700;cursor:pointer;position:absolute;top:10px;right:20px;z-index:1001}.options{margin-top:20px;padding-top:20px;border-top:1px solid #eee}.options p{color:#000}.options strong{color:#28a745}.size-options{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:15px}.size-options label{background-color:#eee;padding:8px 12px;border-radius:5px;cursor:pointer;color:#000}.photo-quantity,.photo-comment{width:100%;margin-top:5px;padding:8px;border:1px solid #ccc;border-radius:5px;color:#000;background-color:#fff}.save-btn{display:block;width:100%;padding:15px;margin-top:20px;background-color:#28a745;color:#fff;border:none;font-size:1.2em;cursor:pointer;border-radius:8px}.finish-btn{display:block;width:100%;padding:15px;margin-top:30px;background-color:#25d366;color:#fff;border:none;font-size:1.2em;cursor:pointer;border-radius:8px}#summary-page .photo-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}.summary-item{display:flex;flex-direction:column}.summary-img-container{position:relative;width:100%;padding-bottom:66.66%;overflow:hidden;cursor:pointer}.summary-img-container img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover}.summary-details{padding:10px;background:#fff}.summary-details .filename{position:static;background:0 0;color:#333;font-size:1em;text-align:left;padding:0;white-space:normal;overflow:visible;text-overflow:clip}.summary-info{padding:10px;font-size:.9em;background:#fff}.summary-info p{margin:0;color:#333}.summary-info strong{color:#28a745}.summary-actions{margin-top:20px;display:flex;gap:10px}.summary-actions button{flex:1}.edit-btn{background-color:#ffc107;color:#333;padding:15px;border-radius:8px;border:none;cursor:pointer}.summary-item .remove-btn{background-color:#dc3545;color:#fff;border:none;padding:5px;border-radius:5px;cursor:pointer;font-size:.8em;margin-top:10px}</style>
+    <script>
+        let selections = {};
+        const fileNames = [];
+        const galleryMode = "pacote";
+        const storageKey = 'photo-selections';
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const lazyImages = document.querySelectorAll('img.lazy');
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const lazyImage = entry.target;
+                        lazyImage.src = lazyImage.dataset.src;
+                        lazyImage.classList.remove('lazy');
+                        observer.unobserve(lazyImage);
+                    }
+                });
+            });
+            lazyImages.forEach(lazyImage => observer.observe(lazyImage));
+
+            // Carrega a seleção salva no localStorage
+            loadSelections();
+        });
+
+        function loadSelections() {
+            try {
+                const savedSelections = localStorage.getItem(storageKey);
+                if (savedSelections) {
+                    selections = JSON.parse(savedSelections);
+                    // Atualiza a interface para refletir as seleções carregadas
+                    Object.keys(selections).forEach(index => {
+                        updatePhotoGrid(index);
+                    });
+                }
+            } catch (e) {
+                console.error("Não foi possível carregar as seleções do localStorage.", e);
+            }
+        }
+
+        function saveSelectionsToLocalStorage() {
+            try {
+                localStorage.setItem(storageKey, JSON.stringify(selections));
+            } catch (e) {
+                console.error("Não foi possível salvar as seleções no localStorage.", e);
+            }
+        }
+
+        function openModal(index) {
+            document.querySelector('.modal').style.display = 'flex';
+            document.querySelectorAll('.modal-content').forEach(content => content.style.display = 'none');
+            document.getElementById('modal-' + index).style.display = 'block';
+
+            if (selections[index]) {
+                const modal = document.getElementById('modal-' + index);
+                modal.querySelector('.photo-comment').value = selections[index].comment || '';
+                if (galleryMode === 'tradicional') {
+                    modal.querySelector('.photo-quantity').value = selections[index].quantity;
+                    modal.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                        checkbox.checked = selections[index].sizes.includes(checkbox.dataset.size);
+                    });
+                }
+            }
+        }
+
+        function closeModal() {
+            document.querySelector('.modal').style.display = 'none';
+        }
+
+        function saveSelection(index) {
+            const modal = document.getElementById('modal-' + index);
+            let sizes = [];
+            let quantity = 1;
+
+            if (galleryMode === 'tradicional') {
+                sizes = Array.from(modal.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.dataset.size);
+                quantity = modal.querySelector('.photo-quantity').value;
+                if (sizes.length === 0) {
+                    alert('Você precisa selecionar pelo menos um tamanho para a foto.');
+                    return;
+                }
+            } else {
+                sizes = ['Pacote Definido'];
+                quantity = 1;
+            }
+
+            const comment = modal.querySelector('.photo-comment').value;
+
+            selections[index] = {
+                sizes: sizes,
+                quantity: quantity,
+                comment: comment,
+                fileName: fileNames[index]
+            };
+
+            closeModal();
+            updatePhotoGrid(index);
+            saveSelectionsToLocalStorage();
+        }
+
+        function removeSelection(index) {
+            delete selections[index];
+            showSummary();
+            updatePhotoGrid(index);
+            closeModal();
+            saveSelectionsToLocalStorage();
+        }
+
+        function updatePhotoGrid(index) {
+            const photoItem = document.querySelector('.photo-item[onclick="openModal('+index+')"]');
+            if(selections[index]){
+                photoItem.classList.add('selected');
+            } else {
+                photoItem.classList.remove('selected');
+            }
+        }
+
+        function showSummary() {
+            const summaryGrid = document.getElementById('summary-grid');
+            summaryGrid.innerHTML = '';
+            let hasSelections = false;
+
+            Object.entries(selections).forEach(([index, selection]) => {
+                hasSelections = true;
+                const summaryItem = document.createElement('div');
+                summaryItem.classList.add('photo-item', 'summary-item');
+
+                summaryItem.addEventListener('click', (event) => {
+                    if (!event.target.classList.contains('remove-btn')) {
+                        openModal(index);
+                    }
+                });
+
+                let summaryInfoHtml = '';
+                if (galleryMode === 'tradicional') {
+                    summaryInfoHtml = `
+                        <div class="summary-info">
+                            <p><strong>Tamanhos:</strong> ${selection.sizes.join(', ')}</p>
+                            <p><strong>Quantidade:</strong> ${selection.quantity}</p>
+                            ${selection.comment ? `<p><strong>Comentário:</strong> ${selection.comment}</p>` : ''}
+                            <button class="remove-btn" onclick="removeSelection(${index})">Remover</button>
+                        </div>
+                    `;
+                } else { // Modo pacote
+                     summaryInfoHtml = `
+                        <div class="summary-info">
+                            ${selection.comment ? `<p><strong>Comentário:</strong> ${selection.comment}</p>` : ''}
+                            <button class="remove-btn" onclick="removeSelection(${index})">Remover</button>
+                        </div>
+                     `;
+                }
+
+                summaryItem.innerHTML = `
+                    <div class="summary-img-container">
+                       <img src="fotos/${selection.fileName}" alt="${selection.fileName}">
+                    </div>
+                    <div class="summary-details">
+                        <p class="filename">${selection.fileName}</p>
+                        ${summaryInfoHtml}
+                    </div>
+                `;
+                summaryGrid.appendChild(summaryItem);
+            });
+
+            if(!hasSelections){
+                summaryGrid.innerHTML = '<p style="text-align: center;">Nenhuma foto selecionada ainda.</p>';
+            }
+        }
+
+        function goToSummary() {
+            document.getElementById('main-gallery').style.display = 'none';
+            document.getElementById('summary-page').style.display = 'block';
+            showSummary();
+        }
+
+        function backToGallery() {
+            document.getElementById('main-gallery').style.display = 'block';
+            document.getElementById('summary-page').style.display = 'none';
+        }
+
+
+        function finishSelection() {
+            let report = '';
+            let selectedFileNames = [];
+            let hasSelections = false;
+
+            Object.entries(selections).forEach(([index, selection]) => {
+                hasSelections = true;
+                selectedFileNames.push('"' + selection.fileName.replace(/\.[^/.]+$/, "") + '"');
+            });
+
+            if (!hasSelections) {
+                alert('Você precisa selecionar pelo menos uma foto antes de enviar.');
+                return;
+            }
+
+            if (galleryMode === 'tradicional') {
+                report = '*Olá! Gostaria de enviar meu pedido de fotos.*\\n_Por favor, não apague o relatório abaixo._\\n\\n';
+                Object.entries(selections).forEach(([index, selection]) => {
+                    report += 'Foto: ' + selection.fileName + '\\n';
+                    report += '- Tamanhos: ' + selection.sizes.join(', ') + '\\n';
+                    report += '- Quantidade: ' + selection.quantity + '\\n';
+                    if (selection.comment) {
+                        report += '- Comentário: ' + selection.comment + '\\n';
+                    }
+                    report += '\\n';
+                });
+            } else if (galleryMode === 'pacote') {
+                report = '*Olá! Gostaria de enviar meu pedido de fotos.*\\n_Por favor, não apague o relatório abaixo._\\n\\n';
+            }
+
+            report += '*Total de fotos escolhidas:* ' + selectedFileNames.length + '\\n\\n';
+            report += '*Lista das fotos escolhidas para separação:*\\n';
+            report += selectedFileNames.join(' OR ');
+
+            const whatsappNumber = '5542998370150';
+            const encodedReport = encodeURIComponent(report);
+            window.open('https://wa.me/' + whatsappNumber + '?text=' + encodedReport);
+        }
+    </script>
 </head>
 <body>
-
-    <div class="container">
-        <h1>Gerador de Galerias</h1>
-        <div id="drop-area">
-            <input type="file" id="fileElem" multiple accept="image/*">
-            <p>Arraste e solte suas fotos aqui<br>ou<br><button onclick="document.getElementById('fileElem').click()">Clique para selecionar os arquivos</button></p>
+    <div id="main-gallery">
+        <div class="header">
+            <h1>Selecione suas fotos</h1>
+            <p>Clique em cada foto para escolher as opções.</p>
         </div>
 
-        <div class="options">
-            <h2>Modo da Galeria:</h2>
-            <label><input type="radio" name="gallery_mode" value="tradicional" checked> Tradicional</label>
-            <label><input type="radio" name="gallery_mode" value="pacote"> Pacote</label>
-        </div>
+        <div class="photo-grid">
+            </div>
 
-        <div id="progress-container">
-            <div id="progress-bar">0%</div>
-        </div>
+        <div class="modal">
+            </div>
 
-        <button id="download-btn">Gerar e Baixar Galeria</button>
+        <button class="finish-btn" onclick="goToSummary()">Finalizar e Ver Resumo</button>
     </div>
-    <script src="gerador.js"></script>
+
+    <div id="summary-page" style="display: none;">
+        <div class="header">
+            <h2>Resumo do Pedido</h2>
+            <p>Clique nas fotos para editar. Clique no botão de baixo para enviar o pedido.</p>
+        </div>
+        <div id="summary-grid" class="photo-grid"></div>
+        <div class="summary-actions">
+            <button class="edit-btn" onclick="backToGallery()">Editar Tudo</button>
+            <button class="finish-btn" onclick="finishSelection()">Finalizar e Enviar para o Fotógrafo</button>
+        </div>
+    </div>
 </body>
 </html>
