@@ -1,257 +1,232 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seleção de Fotos - Seu Nome</title>
-    <style>
-        body{font-family:sans-serif;background-color:#f7f7f7;padding:20px}.header{text-align:center;margin-bottom:30px}.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:15px}.photo-item{border:1px solid #ccc;overflow:hidden;cursor:pointer;transition:transform .3s;position:relative}.photo-item.selected{border:4px solid #28a745}.photo-item img{width:100%;height:auto;display:block}.photo-item:hover{transform:scale(1.05)}.filename{position:absolute;bottom:0;left:0;width:100%;background:rgba(0,0,0,.6);color:#fff;padding:5px;font-size:.8em;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background-color:rgba(0,0,0,.9);overflow-y:auto;display:flex;align-items:center;justify-content:center;flex-direction:column}.modal.show{display:flex}.modal-content{background-color:#fff;padding:20px;border-radius:8px;max-width:90%;max-height:90vh;position:relative;text-align:center}.modal-content img{max-width:100%;max-height:100%;display:block;margin:auto}.close-btn{color:#000;font-size:30px;font-weight:700;cursor:pointer;position:absolute;top:10px;right:20px;z-index:1001}.options{margin-top:20px;padding-top:20px;border-top:1px solid #eee}.options p{color:#000}.options strong{color:#28a745}.size-options{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:15px}.size-options label{background-color:#eee;padding:8px 12px;border-radius:5px;cursor:pointer;color:#000}.photo-quantity,.photo-comment{width:100%;margin-top:5px;padding:8px;border:1px solid #ccc;border-radius:5px;color:#000;background-color:#fff}.save-btn{display:block;width:100%;padding:15px;margin-top:20px;background-color:#28a745;color:#fff;border:none;font-size:1.2em;cursor:pointer;border-radius:8px}.finish-btn{display:block;width:100%;padding:15px;margin-top:30px;background-color:#25d366;color:#fff;border:none;font-size:1.2em;cursor:pointer;border-radius:8px}#summary-page .photo-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}.summary-item{display:flex;flex-direction:column}.summary-img-container{position:relative;width:100%;padding-bottom:66.66%;overflow:hidden;cursor:pointer}.summary-img-container img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover}.summary-details{padding:10px;background:#fff}.summary-details .filename{position:static;background:0 0;color:#333;font-size:1em;text-align:left;padding:0;white-space:normal;overflow:visible;text-overflow:clip}.summary-info{padding:10px;font-size:.9em;background:#fff}.summary-info p{margin:0;color:#333}.summary-info strong{color:#28a745}.summary-actions{margin-top:20px;display:flex;gap:10px}.summary-actions button{flex:1}.edit-btn{background-color:#ffc107;color:#333;padding:15px;border-radius:8px;border:none;cursor:pointer}.summary-item .remove-btn{background-color:#dc3545;color:#fff;border:none;padding:5px;border-radius:5px;cursor:pointer;font-size:.8em;margin-top:10px}</style>
-    <script>
-        let selections = {};
-        const fileNames = [];
-        const galleryMode = "pacote";
-        const storageKey = 'photo-selections';
+<!DOCTYPE html><html lang="pt-br"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Seleção de Fotos - Seu Nome</title><style>body{font-family:sans-serif;background-color:#f7f7f7;padding:20px}.header{text-align:center;margin-bottom:30px}.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:15px}.photo-item{border:1px solid #ccc;overflow:hidden;cursor:pointer;transition:transform .3s;position:relative}.photo-item.selected{border:4px solid #28a745}.photo-item img{width:100%;height:auto;display:block}.photo-item:hover{transform:scale(1.05)}.filename{position:absolute;bottom:0;left:0;width:100%;background:rgba(0,0,0,.6);color:#fff;padding:5px;font-size:.8em;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background-color:rgba(0,0,0,.9);overflow-y:auto;display:flex;align-items:center;justify-content:center;flex-direction:column}.modal.show{display:flex}.modal-content{background-color:#fff;padding:20px;border-radius:8px;max-width:90%;max-height:90vh;position:relative;text-align:center}.modal-content img{max-width:100%;max-height:100%;display:block;margin:auto}.close-btn{color:#000;font-size:30px;font-weight:700;cursor:pointer;position:absolute;top:10px;right:20px;z-index:1001}.options{margin-top:20px;padding-top:20px;border-top:1px solid #eee}.options p{color:#000}.options strong{color:#28a745}.size-options{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:15px}.size-options label{background-color:#eee;padding:8px 12px;border-radius:5px;cursor:pointer;color:#000}.photo-quantity,.photo-comment{width:100%;margin-top:5px;padding:8px;border:1px solid #ccc;border-radius:5px;color:#000;background-color:#fff}.save-btn{display:block;width:100%;padding:15px;margin-top:20px;background-color:#28a745;color:#fff;border:none;font-size:1.2em;cursor:pointer;border-radius:8px}.finish-btn{display:block;width:100%;padding:15px;margin-top:30px;background-color:#25d366;color:#fff;border:none;font-size:1.2em;cursor:pointer;border-radius:8px}#summary-page .photo-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}.summary-item{display:flex;flex-direction:column}.summary-img-container{position:relative;width:100%;padding-bottom:66.66%;overflow:hidden;cursor:pointer}.summary-img-container img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover}.summary-details{padding:10px;background:#fff}.summary-details .filename{position:static;background:0 0;color:#333;font-size:1em;text-align:left;padding:0;white-space:normal;overflow:visible;text-overflow:clip}.summary-info{padding:10px;font-size:.9em;background:#fff}.summary-info p{margin:0;color:#333}.summary-info strong{color:#28a745}.summary-actions{margin-top:20px;display:flex;gap:10px}.summary-actions button{flex:1}.edit-btn{background-color:#ffc107;color:#333;padding:15px;border-radius:8px;border:none;cursor:pointer}.summary-item .remove-btn{background-color:#dc3545;color:#fff;border:none;padding:5px;border-radius:5px;cursor:pointer;font-size:.8em;margin-top:10px}</style><script>
+            let selections = {};
+            const fileNames = ["a (3).JPG","a (4).JPG","a (5).JPG","a (6).JPG","a (7).JPG","a (8).JPG","a (9).JPG","a (10).JPG","a (11).JPG","a (12).JPG","a (13).JPG","a (14).JPG","a (15).JPG","a (16).JPG","a (17).JPG","a (18).JPG","a (19).JPG","a (20).JPG","a (21).JPG","a (22).JPG","a (23).JPG","a (24).JPG","a (25).JPG","a (26).JPG","a (27).JPG","a (28).JPG","a (29).JPG","a (30).JPG","a (31).JPG","a (32).JPG","a (33).JPG","a (34).JPG","a (35).JPG","a (36).JPG","a (37).JPG","a (38).JPG","a (39).JPG","a (40).JPG","a (41).JPG","a (42).JPG","a (43).JPG","a (44).JPG","a (45).JPG","a (46).JPG","a (47).JPG","a (48).JPG","a (49).JPG","a (50).JPG","a (51).JPG","a (52).JPG","a (53).JPG","a (54).JPG","a (55).JPG","a (56).JPG","a (57).JPG","a (58).JPG","a (59).JPG","a (60).JPG","a (61).JPG","a (62).JPG","a (63).JPG","a (64).JPG","a (65).JPG","a (66).JPG","a (67).JPG","a (68).JPG","a (69).JPG","a (70).JPG","a (71).JPG","a (72).JPG","a (73).JPG","a (74).JPG","a (75).JPG","a (76).JPG","a (77).JPG","a (78).JPG","a (79).JPG","a (80).JPG","a (81).JPG","a (82).JPG","a (83).JPG","a (84).JPG","a (85).JPG","a (86) - Copia.jpg","a (86).JPG","a (87).JPG","a (88).JPG","a (89).JPG","a (90).JPG","a (91).JPG","a (92).JPG","a (93).JPG","a (94).JPG","a (95).JPG","a (96).JPG","a (97).JPG","a (98).JPG","a (99).JPG","a (100).JPG","a (101).JPG","a (102).JPG","a (103).JPG","a (104).JPG","a (105).JPG","a (106).JPG","a (107).JPG","a (108).JPG","a (109).JPG","a (110).JPG","a (111).JPG","a (112).JPG","a (113).JPG","a (114).JPG","a (115).JPG","a (116).JPG","a (117).JPG","a (118).JPG","a (119).JPG","a (120).JPG","a (121).JPG","a (122).JPG","a (123).JPG","a (124).JPG","a (125).JPG","a (126).JPG","a (127).JPG","a (128).JPG","a (129).JPG","a (130).JPG","a (131).JPG","a (132).JPG","a (133).JPG","a (134).JPG","a (135).JPG","a (136).JPG","a (137).JPG","a (138).JPG","a (139).JPG","a (140).JPG","a (141).JPG","a (142).JPG","a (143).JPG","a (144).JPG","a (145).JPG","a (146).JPG","a (147).JPG","a (148).JPG","a (149).JPG","a (150).JPG","a (151).JPG","a (152).JPG","a (153).JPG","a (154).JPG","a (155).JPG","a (156).JPG","a (157).JPG","a (158).JPG","a (159).JPG","a (160).JPG","a (161).JPG","a (162).JPG","a (163).JPG","a (164).JPG","a (165).JPG","a (166).JPG","a (167).JPG","a (168).JPG","a (169).JPG","a (170).JPG","a (171).JPG","a (172).JPG","a (173).JPG","a (174).JPG","a (175).JPG","a (176).JPG","a (177).JPG","a (178).JPG","a (179).JPG","a (180).JPG","a (181).JPG","a (182).JPG","a (183).JPG","a (184).JPG","a (185).JPG","a (186).JPG","a (187).JPG","a (188).JPG","a (189).JPG","a (190).JPG","a (191).JPG","a (192).JPG","a (193).JPG","a (194).JPG","a (195).JPG","a (196).JPG","a (197).JPG","a (198).JPG","a (199).JPG","a (200).JPG","a (201).JPG","a (202).JPG","a (203).JPG","a (204).JPG","a (205).JPG","a (206).JPG","a (207).JPG","a (208).JPG","a (209).JPG","a (210).JPG","a (211).JPG","a (212).JPG","a (213).JPG","a (214).JPG","a (215).JPG","a (216).JPG","a (217).JPG","a (218).JPG","a (219).JPG","a (220).JPG","a (221).JPG","a (222).JPG","a (223).JPG","a (224).JPG","a (225).JPG","a (226).JPG","a (227).JPG","a (228).JPG","a (229).JPG","a (230).JPG","a (231).JPG","a (232).JPG","a (233).JPG","a (234).JPG","a (235).JPG","a (236).JPG","a (237).JPG","a (238).JPG","a (239).JPG","a (240).JPG","a (241).JPG","a (242).JPG","a (243).JPG","a (244).JPG","a (245).JPG","a (246).JPG","a (247).JPG","a (248).JPG","a (249).JPG","a (250).JPG","a (251).JPG","a (252).JPG","a (253).JPG","a (254).JPG","a (255).JPG","a (256).JPG","a (257).JPG","a (258).JPG","a (259).JPG","a (260).JPG","a (261).JPG","a (262).JPG","a (263).JPG","a (264).JPG","a (265).JPG","a (266).JPG","a (267).JPG","a (268).JPG","a (269).JPG","a (270).JPG","a (271).JPG","a (272).JPG","a (273).JPG","a (274).JPG","a (275).JPG","a (276).JPG","a (277).JPG","a (278).JPG","a (279).JPG","a (280).JPG","a (281).JPG","a (282).JPG","a (283).JPG","a (284).JPG","a (285).JPG","a (286).JPG","a (287).JPG","a (288).JPG","a (289).JPG","a (290).JPG","a (291).JPG","a (292).JPG","a (293).JPG","a (294).JPG","a (295).JPG","a (296).JPG","a (297).JPG","a (298).JPG","a (299).JPG","a (300).JPG","a (301).JPG","a (302).JPG","a (303).JPG","a (304).JPG","a (305).JPG","a (306).JPG","a (307).JPG","a (308).JPG","a (309).JPG","a (310) - Copia.jpg","a (310).JPG","a (311).JPG","a (312).JPG","a (313).JPG","a (314).JPG","a (315).JPG","a (316).JPG","a (317).JPG","a (318).JPG","a (319).JPG","a (320).JPG","a (321).JPG","a (322).JPG","a (323).JPG","a (324).JPG","a (325).JPG","a (326).JPG","a (327).JPG","a (328).JPG","a (329).JPG","a (330).JPG","a (331).JPG","a (332) - Copia.jpg","a (332).JPG","a (333).JPG","a (334).JPG","a (335).JPG","a (336).JPG","a (337).JPG","a (338).JPG","a (339).JPG","a (340).JPG","a (341).JPG","a (342).JPG","a (343).JPG","a (344).JPG","a (345).JPG","a (346).JPG","a (347).JPG","a (348).JPG","a (349).JPG","a (350).JPG","a (351).JPG","a (352).JPG","a (353).JPG","a (354).JPG","a (355).JPG","a (356).JPG","a (357).JPG","a (358).JPG","a (359).JPG","a (360).JPG","a (361).JPG","a (362).JPG","a (363).JPG","a (364).JPG","a (365).JPG","a (366).JPG","a (367).JPG","a (368).JPG","a (369).JPG","a (370).JPG","a (371).JPG","a (372).JPG","a (373).JPG","a (374).JPG","a (375).JPG","a (376).JPG","a (377).JPG","a (378).JPG","a (379).JPG","a (380).JPG","a (381).JPG","a (382).JPG","a (383).JPG","a (384).JPG","a (385).JPG","a (386).JPG","a (387).JPG","a (388).JPG","a (389).JPG","a (390).JPG","a (391).JPG","a (392).JPG","a (393).JPG","a (394).JPG","a (395).JPG","a (396).JPG","a (397).JPG","a (398).JPG","a (399).JPG","a (400).JPG","a (401).JPG","a (402).JPG","a (403).JPG","a (404).JPG","a (405).JPG","a (406).JPG","a (407).JPG","a (408).JPG","a (409).JPG","a (410).JPG","a (411).JPG","a (412).JPG","a (413).JPG","a (414).JPG","a (415).JPG","a (416).JPG","a (417).JPG","a (418).JPG","a (419).JPG","a (420).JPG","a (421).JPG","a (422).JPG","a (423).JPG","a (424).JPG","a (425).JPG","a (426).JPG","a (427).JPG","a (428).JPG","a (429).JPG","a (430).JPG","a (431).JPG","a (432).JPG","a (433).JPG","a (434).JPG","a (435).JPG","a (436).JPG","a (437).JPG","a (438).JPG","a (439).JPG","a (440).JPG","a (441).JPG","a (442).JPG","a (443).JPG","a (444).JPG","a (445).JPG","a (446).JPG","a (447).JPG","a (448).JPG","a (449).JPG","a (450).JPG","a (451).JPG","a (452).JPG","a (453).JPG","a (454).JPG","a (455).JPG","a (456).JPG","a (457).JPG","a (458).JPG","a (459).JPG","a (460).JPG","a (461).JPG","a (462).JPG","a (463).JPG","a (464).JPG","a (465).JPG","a (466).JPG","a (467).JPG","a (468).JPG","a (469).JPG","a (470).JPG","a (471).JPG","a (472).JPG","a (473).JPG","a (474).JPG","a (475).JPG","a (476).JPG","a (477).JPG","a (478).JPG","a (479).JPG","a (480).JPG","a (481).JPG","a (482).JPG","a (483).JPG","a (484).JPG","a (485).JPG","a (486).JPG","a (487).jpg","a (488).JPG","a (489).JPG","a (490).JPG","a (491).JPG","a (492).JPG","a (493).JPG","a (494).JPG","a (495).JPG","a (496).JPG","a (497).JPG","a (498).JPG","a (499).JPG","a (500).JPG","a (501).JPG","a (502).JPG","a (503).JPG","a (504).JPG","a (505).JPG","a (506).JPG","a (507).JPG","a (508).JPG","a (509).JPG","a (510).JPG","a (511).JPG","a (512).JPG","a (513).JPG","a (514).JPG","a (515).JPG","a (516).JPG","a (517).JPG","a (518).JPG","a (519).JPG","a (520) - Copia.jpg","a (520).JPG","a (521).JPG","a (522).JPG","a (523).JPG","a (524).JPG","a (525).JPG","a (526).JPG","a (527).JPG","a (528).JPG","a (529).JPG","a (530).JPG","a (531).JPG","a (532).JPG","a (533).JPG","a (534).JPG","a (535).JPG","a (536).JPG","a (537).JPG","a (538).JPG","a (539).JPG","a (540).JPG","a (541).JPG","a (542).JPG","a (543).JPG","a (544).JPG","a (545).JPG","a (546).jpg","a (547).JPG","a (548).JPG","a (549).JPG","a (550).JPG","a (551).JPG","a (552).JPG","a (553).JPG","a (554).JPG","a (555).JPG","a (556).JPG","a (557).JPG","a (558).JPG","a (559).JPG","a (560).JPG","a (561).JPG","a (562).JPG","a (563).JPG","a (564).JPG","a (565).JPG","a (566).JPG","a (567).JPG","a (568).JPG","a (569).JPG","a (570).JPG","a (571).JPG","a (572).JPG","a (573).JPG","a (574).JPG","a (575).JPG","a (576).JPG","a (577).JPG","a (578).JPG","a (579).JPG","a (580).JPG","a (581).JPG","a (582).JPG","a (583).JPG","a (584).JPG","a (585).JPG","a (586).JPG","a (587).JPG","a (588).JPG","a (589).JPG","a (590).JPG","a (591).JPG","a (592).JPG","a (593).JPG","a (594).JPG","a (595).JPG","a (596).JPG","a (597).JPG","a (598).JPG","a (599).JPG","a (600).JPG","a (601).JPG","a (602).JPG","a (603).JPG","a (604).JPG","a (605).JPG","a (606).JPG","a (607).JPG","a (608).JPG","a (609).JPG","a (610).JPG","a (611).JPG","a (612).JPG","a (613).JPG","a (614).JPG","a (615).JPG","a (616).JPG","a (617).JPG","a (618).JPG","a (619).JPG","a (620).JPG","a (621).JPG","a (622).JPG","a (623).JPG","a (624).JPG","a (625).JPG","a (626).JPG","a (627).JPG","a (628).JPG","a (629).JPG","a (630).JPG","a (631).JPG","a (632).JPG","a (633).JPG","a (634).JPG","a (635).JPG","a (636).JPG","a (637).JPG","a (638).JPG","a (639).JPG","a (640).JPG","a (641).JPG","a (642).JPG","a (643).JPG","a (644).JPG","a (645).JPG","a (646).JPG","a (647).JPG","a (648).JPG","a (649).JPG","a (650).JPG","a (651).JPG","a (652).JPG","a (653).JPG","a (654).JPG","a (655).JPG","a (656).JPG","a (657).JPG","a (658).JPG","a (659).JPG","a (660).JPG","a (661).JPG","a (662).JPG","a (663).JPG","a (664).JPG","a (665).JPG","a (666).JPG","a (667).JPG","a (668).JPG","a (669).JPG","a (670).JPG","a (671).JPG","a (672).JPG","a (673).JPG","a (674).JPG","a (675).JPG","a (676).JPG","a (677).JPG","a (678).JPG","a (679).JPG","a (680).JPG","a (681).JPG","a (682).JPG","a (683).JPG","a (684).JPG","a (685).JPG","a (686).jpg","a (687).JPG","a (688).JPG","a (689).JPG","a (690).JPG","a (691).JPG","a (692).JPG","a (693).JPG","a (694).JPG","a (695).JPG","a (696).JPG","a (697).JPG","a (698).JPG","a (699).JPG","a (700).JPG","a (701).JPG","a (702) - Copia.jpg","a (702).JPG","a (703).JPG","a (704).JPG","a (705).JPG","a (706).JPG","a (707).JPG","a (708).JPG","a (709).JPG","a (710).JPG","a (711).JPG","a (712).JPG","a (713).JPG","a (714).JPG","a (715).JPG","a (716).JPG","a (717).JPG","a (718).JPG","a (719).JPG","a (720).JPG","a (721).JPG","a (722).JPG","a (723).JPG","a (724).JPG","a (725).JPG","a (726).JPG","a (727).JPG","a (728).JPG","a (729).JPG","a (730).JPG","a (731).JPG","a (732).JPG","a (733).JPG","a (734).JPG","a (735).JPG","a (736).JPG","a (737).JPG","a (738).JPG","a (739).JPG","a (740).JPG","a (741).JPG","a (742).JPG","a (743).JPG","a (744).JPG","a (745).JPG","a (746).JPG","a (747).JPG","a (748).JPG","a (749).JPG","a (750).JPG","a (751).JPG","a (752).JPG","a (753).JPG","a (754).JPG","a (755).JPG","a (756).JPG","a (757).JPG","a (758).JPG","a (759).JPG","a (760).JPG","a (761).JPG","a (762).JPG","a (763).JPG","a (764).JPG","a (765).JPG","a (766).JPG","a (767).JPG","a (768).JPG","a (769).JPG","a (770).JPG","a (771).JPG","a (772).JPG","a (773).JPG","a (774).JPG","a (775).JPG","a (776).JPG","a (777).JPG","a (778).JPG","a (779).JPG","a (780).JPG","a (781).JPG","a (782).JPG","a (783).JPG","a (784).JPG","a (785).JPG","a (786).JPG","a (787).JPG","a (788).JPG","a (789).JPG","a (790).JPG","a (791).JPG","a (792).JPG","a (793).JPG","a (794).JPG","a (795).JPG","a (796) - Copia.jpg","a (796).JPG","a (797).JPG","a (798).JPG","a (799).JPG","a (800).JPG","a (801).JPG","a (802).JPG","a (803).JPG","a (804).JPG","a (805).JPG","a (806).JPG","a (807).JPG","a (808).JPG","a (809).JPG","a (810).JPG","a (811).JPG","a (812).JPG","a (813).JPG","a (814).JPG","a (815).JPG","a (816) - Copia.jpg","a (816).JPG","a (817).JPG","a (818).JPG","a (819).JPG","a (820).JPG","a (821).JPG","a (822).JPG","a (823).JPG","a (824).JPG","a (825).JPG","a (826).JPG","a (827).JPG","a (828).JPG","a (829).JPG","a (830).JPG","a (831).JPG","a (832).JPG","a (833).JPG","a (834).JPG","a (835).JPG","a (836).JPG","a (837).JPG","a (838).JPG","a (839).JPG","a (840).JPG","a (841).JPG","a (842).JPG","a (843).JPG","a (844).JPG","a (845).JPG","a (846).JPG","a (847).JPG","a (848).JPG","a (849).JPG","a (850).JPG","a (851).JPG","a (852).JPG","a (853).JPG","a (854).JPG","a (855).JPG","a (856).JPG","a (857).JPG","a (858).JPG","a (859).JPG","a (860).JPG","a (861).JPG","a (862).JPG","a (863).JPG","a (864).JPG","a (865).JPG","a (866).JPG","a (867).JPG","a (868).JPG","a (869).JPG","a (870).JPG","a (871).JPG","a (872).JPG","a (873).JPG","a (874).JPG","a (875).JPG","a (876).JPG","a (877).JPG","a (878).JPG","a (879).JPG","a (880).JPG","a (881).JPG","a (882).JPG","a (883).JPG","a (884).JPG","a (885).JPG","a (886).JPG","a (887).JPG","a (888).JPG","a (889).JPG","a (890).JPG","a (891).JPG","a (892).JPG","a (893).JPG","a (894).JPG","a (895).JPG","a (896).JPG","a (897).JPG","a (898).JPG","a (899).JPG","a (900).JPG","a (901).JPG","a (902).JPG","a (903).JPG","a (904).JPG","a (905).JPG","a (906).JPG","a (907).JPG","a (908).JPG","a (909).JPG","a (910).JPG","a (911).JPG","a (912).JPG","a (913).JPG","a (914).JPG","a (915).JPG","a (916).JPG","a (917).JPG","a (918).JPG","a (919).JPG","a (920).JPG","a (921).JPG","a (922).JPG","a (923).JPG","a (924).JPG","a (925).JPG","a (926).JPG","a (927).JPG","a (928).JPG","a (929).JPG","a (930).JPG","a (931).JPG","a (932).JPG","a (933).JPG","a (934).JPG","a (935).JPG","a (936).JPG","a (937).JPG","a (938).JPG","a (939).JPG","a (940).JPG","a (941).JPG","a (942).JPG","a (943).JPG","a (944).JPG","a (945).JPG","a (946).JPG","a (947).JPG","a (948).JPG","a (949).JPG","a (950).JPG","a (951).JPG","a (952).JPG","a (953).JPG","a (954).JPG","a (955).JPG","a (956).JPG","a (957).JPG","a (958).JPG","a (959).JPG","a (960).JPG","a (961).JPG","a (962).JPG","a (963).JPG","a (964).JPG","a (965).JPG","a (966).JPG","a (967).JPG","a (968).JPG","a (969).JPG","a (970).JPG","a (971).JPG","a (972).JPG","a (973).JPG","a (974).JPG","a (975).JPG","a (976).JPG","a (977).JPG","a (978).JPG","a (979).JPG","a (980).JPG","a (981).JPG","a (982).JPG","a (983).JPG","a (984).JPG","a (985).JPG","a (986).JPG","a (987).JPG","a (988).JPG","a (989).JPG","a (990).JPG","a (991).JPG","a (992).JPG","a (993).JPG","a (994).JPG","a (995).JPG","a (996).JPG","a (997).JPG","a (998).JPG","a (999).JPG","a (1000).JPG","a (1001).JPG","a (1002).JPG","a (1003).JPG","a (1004).JPG","a (1005).JPG","a (1006).JPG","a (1007).JPG","a (1008).JPG","a (1009).JPG","a (1010).JPG","a (1011).JPG","a (1012).JPG","a (1013).JPG","a (1014).JPG","a (1015).JPG","a (1016).JPG","a (1017).JPG","a (1018).JPG","a (1019).JPG","a (1020).JPG","a (1021).JPG","a (1022).JPG","a (1023).JPG","a (1024).JPG","a (1025).JPG","a (1026).JPG","a (1027).JPG","a (1028).JPG","a (1029).JPG","a (1030).JPG","a (1031).JPG","a (1032).JPG","a (1033).JPG","a (1034).JPG","a (1035).JPG","a (1036).JPG","a (1037).JPG","a (1038).JPG","a (1039).JPG","a (1040).JPG","a (1041).JPG","a (1042).JPG","a (1043).JPG","a (1044).JPG","a (1045).JPG","a (1046).JPG","a (1047).JPG","a (1048).JPG","a (1049).JPG","a (1050).JPG","a (1051).JPG","a (1052).JPG","a (1053).JPG","a (1054).JPG","a (1055).JPG","a (1056).JPG","a (1057).JPG","a (1058).JPG","a (1059).JPG","a (1060).JPG","a (1061).JPG","a (1062).JPG","a (1063).JPG","a (1064).JPG","a (1065).JPG","a (1066).JPG","a (1067).JPG","a (1068).JPG","a (1069).JPG","a (1070).JPG","a (1071).JPG","a (1072).JPG","a (1073).JPG","a (1074).JPG","a (1075).JPG","a (1076).JPG","a (1077).JPG","a (1078).JPG","a (1079).JPG","a (1080).JPG","a (1081).JPG","a (1082).JPG","a (1083).JPG","a (1084).JPG","a (1085).JPG","a (1086).JPG","a (1087).JPG","a (1088).JPG","a (1089).JPG","a (1090).JPG","a (1091).JPG","a (1092).JPG","a (1093).JPG","a (1094).JPG","a (1095).JPG","a (1096).JPG","a (1097).JPG","a (1098).JPG","a (1099).JPG","a (1100).JPG","a (1101).JPG","a (1102).JPG","a (1103).JPG","a (1104).JPG","a (1105).JPG","a (1106).JPG","a (1107).JPG","a (1108).JPG","a (1109).JPG","a (1110).JPG","a (1111).JPG","a (1112).JPG","a (1113).JPG","a (1114).JPG","a (1115).JPG","a (1116).JPG","a (1117).JPG","a (1118).JPG","a (1119).JPG","a (1120).JPG","a (1121).JPG","a (1122).JPG","a (1123).JPG","a (1124).JPG","a (1125).JPG","a (1126).JPG","a (1127).JPG","a (1128).JPG","a (1129).JPG","a (1130).JPG","a (1131).JPG","a (1132).JPG","a (1133).JPG","a (1134).JPG","a (1135).JPG","a (1136).JPG","a (1137).JPG","a (1138).JPG","a (1139).JPG","a (1140).JPG","a (1141).JPG","a (1142).JPG","a (1143).JPG","a (1144).JPG","a (1145).JPG","a (1146).JPG","a (1147).JPG","a (1148).JPG","a (1149).JPG","a (1150).JPG","a (1151).JPG","a (1152).JPG","a (1153).JPG","a (1154).JPG","a (1155).JPG","a (1156).JPG","a (1157).JPG","a (1158).JPG","a (1159).JPG","a (1160).JPG","a (1161).JPG","a (1162).JPG","a (1163).JPG","a (1164).JPG","a (1165).JPG","a (1166).JPG","a (1167).JPG","a (1168).JPG","a (1169).JPG","a (1170).JPG","a (1171).JPG","a (1172).JPG","a (1173).JPG","a (1174).JPG","a (1175).JPG","a (1176).JPG","a (1177).JPG","a (1178).JPG","a (1179).JPG","a (1180).JPG","a (1181).JPG","a (1182).JPG","a (1183).JPG","a (1184).JPG","a (1185).JPG","a (1186).JPG","a (1187).JPG","a (1188).JPG","a (1189).JPG","a (1190).JPG","a (1191).JPG","a (1192).JPG","a (1193).JPG","a (1194).JPG","a (1195).JPG","a (1196).JPG","a (1197).JPG","a (1198).JPG","a (1199).JPG","a (1200).JPG","a (1201).JPG","a (1202).JPG","a (1203).JPG","a (1204).JPG","a (1205).JPG","a (1206).JPG","a (1207).JPG","a (1208).JPG","a (1209).JPG","a (1210).JPG","a (1211).JPG","a (1212).JPG","a (1213).JPG","a (1214).JPG","a (1215).JPG","a (1216).JPG","a (1217).JPG","a (1218).JPG","a (1219).JPG","a (1220).JPG","a (1221).JPG","a (1222).JPG","a (1223).JPG","a (1224).JPG","a (1225).JPG","a (1226).JPG","a (1227).JPG","a (1228).JPG","a (1229).JPG","a (1230).JPG","a (1231).JPG","a (1232).JPG","a (1233).JPG","a (1234).JPG","a (1235).JPG","a (1236).JPG","a (1237).JPG","a (1238).JPG","a (1239).JPG","a (1240).JPG","a (1241).JPG","a (1242).JPG","a (1243).JPG","a (1244).JPG","a (1245).JPG","a (1246).JPG","a (1247).JPG","a (1248).JPG","a (1249).JPG","a (1250).JPG","a (1251).JPG","a (1252).JPG","a (1253).JPG","a (1254).JPG","a (1255).JPG","a (1256).JPG","a (1257).JPG","a (1258).JPG","a (1259).JPG","a (1260).JPG","a (1261).JPG","a (1262).JPG","a (1263).JPG","a (1264).JPG","a (1265).JPG","a (1266).JPG","a (1267).JPG","a (1268).JPG","a (1269).JPG","a (1270).JPG","a (1271).JPG","a (1272).JPG","a (1273).JPG","a (1274).JPG","a (1275).JPG","a (1276).JPG","a (1277).JPG","a (1278).JPG","a (1279).JPG","a (1280).JPG","a (1281).JPG","a (1282).JPG","a (1283).JPG","a (1284).JPG","a (1285).JPG","a (1286).JPG","a (1287).JPG","a (1288).JPG","a (1289).JPG","a (1290).JPG","a (1291).JPG","a (1292).JPG","a (1293).JPG","a (1294).JPG","a (1295).JPG","a (1296).JPG","a (1297).JPG","a (1298).JPG","a (1299).JPG","a (1300).JPG","a (1301).JPG","a (1302).jpg","a (1303).JPG","a (1304).JPG","a (1305).JPG","a (1306).JPG","a (1307).JPG","a (1308).JPG","a (1309).JPG","a (1310).JPG","a (1311).JPG","a (1312).JPG","a (1313).JPG","a (1314).JPG","a (1315).JPG","a (1316).JPG","a (1317).JPG","a (1318).JPG","a (1319).JPG","a (1320).JPG","a (1321).JPG","a (1322).JPG","a (1323).JPG","a (1324).JPG","a (1325).JPG","a (1326).JPG","a (1327).JPG","a (1328).JPG","a (1329).JPG","a (1330).JPG","a (1331).JPG","a (1332).JPG","a (1333).JPG","a (1334).JPG","a (1335).JPG","a (1336).JPG","a (1337).JPG","a (1338).JPG","a (1339).JPG","a (1340).JPG","a (1341).JPG","a (1342).JPG","a (1343).JPG","a (1344).JPG","a (1345).JPG","a (1346).JPG","a (1347).JPG","a (1348).JPG","a (1349).JPG","a (1350).JPG","a (1351).JPG","a (1352).JPG","a (1353).JPG","a (1354).JPG","a (1355).JPG","a (1356).JPG","a (1357).JPG","a (1358).JPG","a (1359).JPG","a (1360).JPG","a (1361).JPG","a (1362).JPG","a (1363).JPG","a (1364).JPG","a (1365).JPG","a (1366).JPG","a (1367).JPG","a (1368).JPG","a (1369).JPG","a (1370).JPG","a (1371).JPG","a (1372).JPG","a (1373).JPG","a (1374).JPG","a (1375).JPG","a (1376).JPG","a (1377).JPG","a (1378).JPG","a (1379).JPG","a (1380).JPG","a (1381).JPG","a (1382).JPG","a (1383).JPG","a (1384).JPG","a (1385).JPG","a (1386).JPG","a (1387).JPG","a (1388).JPG","a (1389).JPG","a (1390).JPG","a (1391).JPG","a (1392).JPG","a (1393).JPG","a (1394).JPG","a (1395).JPG","a (1396).JPG","a (1397).JPG","a (1398).JPG","a (1399).JPG","a (1400).JPG","a (1401).JPG","a (1402).JPG","a (1403).JPG","a (1404).JPG","a (1405).JPG","a (1406).JPG","a (1407).JPG","a (1408).JPG","a (1409).JPG","a (1410) - Copia.jpg","a (1410).JPG","a (1411).JPG","a (1412).JPG","a (1413).JPG","a (1414).JPG","a (1415).JPG","a (1416).JPG","a (1417).JPG","a (1418).JPG","a (1419).JPG","a (1420).JPG","a (1421).JPG","a (1422).JPG","a (1423).JPG","a (1424).JPG","a (1425).JPG","a (1426).JPG","a (1427).JPG","a (1428).JPG","a (1429).JPG","a (1430).JPG","a (1431).JPG","a (1432).JPG","a (1433).JPG","a (1434).JPG","a (1435).JPG","a (1436).JPG","a (1437).JPG","a (1438).JPG","a (1439).JPG","a (1440).JPG","a (1441).JPG","a (1442).JPG","a (1443).JPG","a (1444).JPG","a (1445).JPG","a (1446).JPG","a (1447).JPG","a (1448).JPG","a (1449).JPG","a (1450).JPG","a (1451).JPG","a (1452).JPG","a (1453).JPG","a (1454).JPG","a (1455).JPG","a (1456).JPG","a (1457).JPG","a (1458).JPG","a (1459).JPG","a (1460).JPG","a (1461).JPG","a (1462).JPG","a (1463).JPG","a (1464).JPG","a (1465).JPG","a (1466).JPG","a (1467).JPG","a (1468).JPG","a (1469).JPG","a (1470).JPG","a (1471).JPG","a (1472).JPG","a (1473).JPG","a (1474).JPG","a (1475).JPG","a (1476).JPG","a (1477).JPG","a (1478).JPG","a (1479).JPG","a (1480).JPG","a (1481).JPG","a (1482).JPG","a (1483).JPG","a (1484) - Copia.jpg","a (1484).JPG","a (1485).JPG","a (1486).JPG","a (1487).JPG","a (1488).JPG","a (1489).JPG","a (1490).JPG","a (1491).JPG","a (1492).JPG","a (1493).JPG","a (1494).JPG","a (1495).JPG","a (1496).JPG","a (1497).JPG","a (1498).JPG","a (1499).JPG","a (1500).JPG","a (1501).JPG","a (1502).JPG","a (1503).JPG","a (1504).JPG","a (1505).JPG","a (1506).JPG","a (1507).JPG","a (1508).JPG","a (1509).JPG","a (1510).JPG","a (1511).JPG","a (1512).JPG","a (1513).JPG","a (1514).JPG","a (1515).JPG","a (1516).JPG","a (1517).JPG","a (1518).JPG","a (1519).JPG","a (1520).JPG","a (1521).JPG","a (1522).JPG","a (1523).JPG","a (1524).JPG","a (1525).JPG","a (1526).JPG","a (1527).JPG","a (1528).JPG","a (1529).JPG","a (1530).JPG","a (1531).JPG","a (1532).JPG","a (1533) - Copia.jpg","a (1533).JPG","a (1534).JPG","a (1535).JPG","a (1536).JPG","a (1537).JPG","a (1538).JPG","a (1539).JPG","a (1540).JPG","a (1541).JPG","a (1542).JPG","a (1543).JPG","a (1544).JPG","a (1545).JPG","a (1546).JPG","a (1547).JPG","a (1548).JPG","a (1549).JPG","a (1550).JPG","a (1551).JPG","a (1552).JPG","a (1553).JPG","a (1554).JPG","a (1555).JPG","a (1556).JPG","a (1557).JPG","a (1558).JPG","a (1559).JPG","a (1560).JPG","a (1561).JPG","a (1562).JPG","a (1563).JPG","a (1564).JPG","a (1565).JPG","a (1566).JPG","a (1567).JPG","a (1568).JPG","a (1569).JPG","a (1570).JPG","a (1571).JPG","a (1572).JPG","a (1573).JPG","a (1574).JPG","a (1575).JPG","a (1576).JPG","a (1577).JPG","a (1578).JPG","a (1579).JPG","a (1580).JPG","a (1581).JPG","a (1582).JPG","a (1583).JPG","a (1584).JPG","a (1585).JPG","a (1586).JPG","a (1587).JPG","a (1588).JPG","a (1589).JPG","a (1590).JPG","a (1591).JPG","a (1592).JPG","a (1593).JPG","a (1594).JPG","a (1595).JPG","a (1596).JPG","a (1597).JPG","a (1598).JPG","a (1599).JPG","a (1600).JPG","a (1601).JPG","a (1602).JPG","a (1603).JPG","a (1604).JPG","a (1605).JPG","a (1606).JPG","a (1607).JPG","a (1608).JPG","a (1609).JPG","a (1610).JPG","a (1611).JPG","a (1612).JPG","a (1613).JPG","a (1614).JPG","a (1615).JPG","a (1616).JPG","a (1617).JPG","a (1618).JPG","a (1619).JPG","a (1620).JPG","a (1621).JPG","a (1622).JPG","a (1623).JPG","a (1624).JPG","a (1625).JPG","a (1626).JPG","a (1627).JPG","a (1628).JPG","a (1629).JPG","a (1630).JPG","a (1631).JPG","a (1632).JPG","a (1633).JPG","a (1634).JPG","a (1635).JPG","a (1636).JPG","a (1637).JPG","a (1638).JPG","a (1639).JPG","a (1640).JPG","a (1641).JPG","a (1642).JPG","a (1643).JPG","a (1644).JPG","a (1645).JPG","a (1646).JPG","a (1647).JPG","a (1648).JPG","a (1649).JPG","a (1650).JPG","a (1651).JPG","a (1652).JPG","a (1653).JPG","a (1654).JPG","a (1655).JPG","a (1656).JPG","a (1657).JPG","a (1658).JPG","a (1659).JPG","a (1660).JPG","a (1661).JPG","a (1662).JPG","a (1663).JPG","a (1664).JPG","a (1665).JPG","a (1666).JPG","a (1667).JPG","a (1668).JPG","a (1669).JPG","a (1670).JPG","a (1671).JPG","a (1672).JPG","a (1673).JPG","a (1674).JPG","a (1675).JPG","a (1676).JPG","a (1677).JPG","a (1678).JPG","a (1679).JPG","a (1680).JPG","a (1681).JPG","a (1682).JPG","a (1683).JPG","a (1684).JPG","a (1685).JPG","a (1686).JPG","a (1687).JPG","a (1688).JPG","a (1689).JPG","a (1690).JPG","a (1691).JPG","a (1692).JPG","a (1693).JPG","a (1694).JPG","a (1695).JPG","a (1696).JPG","a (1697).JPG","a (1698).JPG","a (1699).JPG","a (1700).JPG","a (1701).JPG","a (1702).JPG","a (1703).JPG","a (1704).JPG","a (1705).JPG","a (1706).JPG","a (1707).JPG","a (1708).JPG","a (1709).JPG","a (1710).JPG","a (1711).JPG","a (1712).JPG","a (1713).JPG","a (1714).JPG","a (1715).JPG","a (1716).JPG","a (1717).JPG","a (1718).JPG","a (1719).JPG","a (1720).JPG","a (1721).JPG","a (1722).JPG","a (1723).JPG","a (1724).JPG","a (1725).JPG","a (1726).JPG","a (1727).JPG","a (1728).JPG","a (1729).JPG","a (1730).JPG","a (1731).JPG","a (1732).JPG","a (1733).JPG","a (1734).JPG","a (1735).JPG","a (1736).JPG","a (1737).JPG","a (1738).JPG","a (1739).JPG","a (1740).JPG","a (1741).JPG","a (1742).JPG","a (1743).JPG","a (1744).JPG","a (1745).JPG","a (1746).JPG","a (1747).JPG","a (1748).JPG","a (1749).JPG","a (1750).JPG","a (1751).JPG","a (1752).JPG","a (1753).JPG","a (1754).JPG","a (1755).JPG","a (1756).JPG","a (1757).JPG","a (1758).JPG","a (1759).JPG","a (1760).JPG","a (1761).JPG","a (1762).JPG","a (1763).JPG","a (1764).JPG","a (1765).JPG","a (1766).JPG","a (1767).JPG","a (1768).JPG","a (1769).JPG","a (1770).JPG","a (1771).JPG","a (1772).JPG","a (1773).JPG","a (1774).JPG","a (1775).JPG","a (1776).JPG","a (1777).JPG","a (1778).JPG","a (1779).JPG","a (1780).JPG","a (1781).JPG","a (1782).JPG","a (1783).JPG","a (1784).JPG","a (1785).JPG","a (1786).JPG","a (1787).JPG","a (1788).JPG","a (1789).JPG","a (1790).JPG","a (1791).JPG","a (1792).JPG","a (1793).JPG","a (1794).JPG","a (1795).JPG","a (1796).JPG","a (1797).JPG","a (1798).JPG","a (1799).JPG","a (1800).JPG","a (1801).JPG","a (1802).JPG","a (1803).JPG","a (1804).JPG","a (1805).JPG","a (1806).JPG","a (1807).JPG","a (1808).JPG","a (1809).JPG","a (1810).JPG","a (1811).JPG","a (1812).JPG","a (1813).JPG","a (1814).JPG","a (1815).JPG","a (1816).JPG","a (1817).JPG","a (1818).JPG","a (1819).JPG","a (1820).JPG","a (1821).JPG","a (1822).JPG","a (1823).JPG","a (1824).JPG","a (1825).JPG","a (1826).JPG","a (1827).JPG","a (1828).JPG","a (1829).JPG","a (1830).JPG","a (1831).JPG","a (1832).JPG","a (1833).JPG","a (1834).JPG","a (1835).JPG","a (1836).JPG","a (1837).JPG","a (1838).JPG","a (1839).JPG","a (1840).JPG","a (1841).JPG","a (1842).JPG","a (1843).JPG","a (1844).JPG","a (1845).JPG","a (1846).JPG","a (1847).JPG","a (1848).JPG","a (1849).JPG","a (1850).JPG","a (1851).JPG","a (1852).JPG","a (1853).JPG","a (1854).JPG","a (1855).JPG","a (1856).JPG","a (1857).JPG","a (1858).JPG","a (1859).JPG","a (1860).JPG","a (1861).JPG","a (1862).JPG","a (1863).JPG","a (1864).JPG","a (1865).JPG","a (1866).JPG","a (1867).JPG","a (1868).JPG","a (1869).JPG","a (1870).JPG","a (1871).JPG","a (1872).JPG","a (1873).JPG","a (1874).JPG","a (1875).JPG","a (1876).JPG","a (1877).JPG","a (1878).JPG","a (1879).JPG","a (1880).JPG","a (1881).JPG","a (1882).JPG","a (1883).JPG","a (1884).JPG","a (1885).JPG","a (1886).JPG","a (1887).JPG","a (1888).JPG","a (1889).JPG","a (1890).JPG","a (1891).JPG","a (1892).JPG","a (1893).JPG","a (1894).JPG","a (1895).JPG","a (1896).JPG","a (1897).JPG","a (1898).JPG","a (1899).JPG","a (1900).JPG","a (1901).JPG","a (1902).JPG","a (1903).JPG","a (1904).JPG","a (1905).JPG","a (1906).JPG","a (1907).JPG","a (1908).JPG","a (1909).JPG","a (1910).JPG","a (1911).JPG","a (1912).JPG","a (1913).JPG","a (1914).JPG","a (1915).JPG","a (1916).JPG","a (1917).JPG","a (1918).JPG","a (1919).JPG","a (1920).JPG","a (1921).JPG","a (1922).JPG","a (1923).JPG","a (1924).JPG","a (1925).JPG","a (1926).JPG","a (1927).JPG","a (1928).JPG","a (1929).JPG","a (1930).JPG","a (1931).JPG","a (1932).JPG","a (1933).JPG","a (1934).JPG","a (1935).JPG","a (1936).JPG","a (1937).JPG","a (1938).JPG","a (1939).JPG","a (1940).JPG","a (1941).JPG","a (1942).JPG","a (1943).JPG","a (1944).JPG","a (1945).JPG","a (1946).JPG","a (1947).JPG","a (1948).JPG","a (1949).JPG","a (1950).JPG","a (1951).JPG","a (1952).JPG","a (1953).JPG","a (1954).JPG","a (1955).JPG","a (1956).JPG","a (1957).JPG","a (1958).JPG","a (1959).JPG","a (1960).JPG","a (1961).JPG","a (1962).JPG","a (1963).JPG","a (1964).JPG","a (1965).JPG","a (1966).JPG","a (1967).JPG","a (1968).JPG","a (1969).JPG","a (1970).JPG","a (1971).JPG","a (1972).JPG","a (1973).JPG","a (1974).JPG","a (1975).JPG","a (1976).JPG","a (1977).JPG","a (1978).JPG","a (1979).JPG","a (1980).JPG","a (1981).JPG","a (1982).JPG","a (1983).JPG","a (1984).JPG","a (1985).JPG","a (1986).JPG","a (1987).JPG","a (1988).JPG","a (1989).JPG","a (1990).JPG","a (1991).JPG","a (1992).JPG","a (1993).JPG","a (1994).JPG","a (1995).JPG","a (1996).JPG","a (1997).JPG","a (1998).JPG","a (1999).JPG","a (2000).JPG","a (2001).JPG","a (2002).JPG","a (2003).JPG","a (2004).JPG","a (2005).JPG","a (2006).JPG","a (2007).JPG","a (2008).JPG","a (2009).JPG","a (2010).JPG","a (2011).JPG","a (2012).JPG","a (2013).JPG","a (2014).JPG","a (2015).JPG","a (2016).JPG","a (2017).JPG","a (2018).JPG","a (2019).JPG","a (2020).JPG","a (2021).JPG","a (2022).JPG","a (2023).JPG","a (2024).JPG","a (2025).JPG","a (2026).JPG","a (2027).JPG","a (2028).JPG","a (2029).JPG","a (2030).JPG","a (2031).JPG","a (2032).JPG","a (2033).JPG","a (2034).JPG","a (2035).JPG","a (2036).JPG","a (2037).JPG","a (2038).JPG","a (2039).JPG","a (2040).JPG","a (2041).JPG","a (2042).JPG","a (2043).JPG","a (2044).JPG","a (2045).JPG","a (2046).JPG","a (2047).JPG","a (2048).JPG","a (2049).JPG","a (2050).JPG","a (2051).JPG","a (2052).JPG","a (2053) - Copia.jpg","a (2053).JPG","a (2054).JPG","a (2055).JPG","a (2056).JPG","a (2057).JPG","a (2058).JPG","a (2059).JPG","a (2060).JPG","a (2061).JPG","a (2062).JPG","a (2063).JPG","a (2064).JPG","a (2065).JPG","a (2066).JPG","a (2067).JPG","a (2068).JPG","a (2069).JPG","a (2070).JPG","a (2071).JPG","a (2072).JPG","a (2073).JPG","a (2074).JPG","a (2075).JPG","a (2076).JPG","a (2077).JPG","a (2078).JPG","a (2079).JPG","a (2080).JPG","a (2081).JPG","a (2082).JPG","a (2083).JPG","a (2084).JPG","a (2085).JPG","a (2086).JPG","a (2087).JPG","a (2088).JPG","a (2089).JPG","a (2090).JPG","a (2091).JPG","a (2092).JPG","a (2093).JPG","a (2094).JPG","a (2095).JPG","a (2096).JPG","a (2097).JPG","a (2098).JPG","a (2099).JPG","a (2100).JPG","a (2101).JPG","a (2102).JPG","a (2103).JPG","a (2104).JPG","a (2105).JPG","a (2106).JPG","a (2107).JPG","a (2108).JPG","a (2109).JPG","a (2110).JPG","a (2111).JPG","a (2112).JPG","a (2113).JPG","a (2114).JPG","a (2115).JPG","a (2116).JPG","a (2117).JPG","a (2118).JPG","a (2119).JPG","a (2120).JPG","a (2121).JPG","a (2122).JPG","a (2123).JPG","a (2124).JPG","a (2125).JPG","a (2126).JPG","a (2127).JPG","a (2128).JPG","a (2129).JPG","a (2130).JPG","a (2131).JPG","a (2132).JPG","a (2133).JPG","a (2134) - Copia.jpg","a (2134).JPG","a (2135).JPG","a (2136).JPG","a (2137).JPG","a (2138).JPG","a (2139).JPG","a (2140).JPG","a (2141).JPG","a (2142).JPG","a (2143).JPG","a (2144).JPG","a (2145).JPG","a (2146).JPG","a (2147).JPG","a (2148).JPG","a (2149).JPG","a (2150).JPG","a (2151).JPG","a (2152).JPG","a (2153).JPG","a (2154).JPG","a (2155).JPG","a (2156).JPG","a (2157).JPG","a (2158).JPG","a (2159).JPG","a (2160).JPG","a (2161).JPG","a (2162).JPG","a (2163).JPG","a (2164).JPG","a (2165).JPG","a (2166).JPG","a (2167).JPG","a (2168).JPG","a (2169).JPG","a (2170).JPG","a (2171).JPG","a (2172).JPG","a (2173).JPG","a (2174).JPG","a (2175).JPG","a (2176).JPG","a (2177).JPG","a (2178).JPG","a (2179).JPG","a (2180).JPG","a (2181).JPG","a (2182).JPG","a (2183).JPG","a (2184).JPG","a (2185).JPG","a (2186).JPG","a (2187).JPG","a (2188).JPG","a (2189).JPG","a (2190).JPG","a (2191).JPG","a (2192).JPG","a (2193).JPG","a (2194).JPG","a (2195).JPG","a (2196).JPG","a (2197).JPG","a (2198).JPG","a (2199).JPG","a (2200).JPG","a (2201).JPG","a (2202).JPG","a (2203).JPG","a (2204).JPG","a (2205).JPG","a (2206).JPG","a (2207).JPG","a (2208).JPG","a (2209).JPG","a (2210).JPG","a (2211).JPG","a (2212).JPG","a (2213).JPG","a (2214).JPG","a (2215).JPG","a (2216).JPG","a (2217).JPG","a (2218).JPG","a (2219).JPG","a (2220).JPG","a (2221).JPG","a (2222).JPG","a (2223).JPG","a (2224).JPG","a (2225).JPG","a (2226).JPG","a (2227).JPG","a (2228).JPG","a (2229).JPG","a (2230).JPG","a (2231).JPG","a (2232).JPG","a (2233).JPG","a (2234).JPG","a (2235).JPG","a (2236).JPG","a (2237).JPG","a (2238).JPG","a (2239).JPG","a (2240).JPG","a (2241).JPG","a (2242).JPG","a (2243).JPG","a (2244).JPG","a (2245).JPG","a (2246).JPG","a (2247).JPG","a (2248).JPG","a (2249).JPG","a (2250).JPG","a (2251).JPG","a (2252).JPG","a (2253).JPG","a (2254).JPG","a (2255).JPG","a (2256).JPG","a (2257).JPG","a (2258).JPG","a (2259).JPG","a (2260).JPG","a (2261).JPG","a (2262).JPG","a (2263).JPG","a (2264).JPG","a (2265).JPG","a (2266).JPG","a (2267).JPG","a (2268).JPG","a (2269).JPG","a (2270).JPG","a (2271).JPG","a (2272).JPG","a (2273).JPG","a (2274).JPG","a (2275).JPG","a (2276).JPG","a (2277).JPG","a (2278).JPG","a (2279).JPG","a (2280).JPG","a (2281).JPG","a (2282).JPG","a (2283).JPG","a (2284).JPG","a (2285).JPG","a (2286).JPG","a (2287).JPG","a (2288).JPG","a (2289).JPG","a (2290).JPG","a (2291).JPG","a (2292).JPG","a (2293).JPG","a (2294).JPG","a (2295).JPG","a (2296).JPG","a (2297).JPG","a (2298).JPG","a (2299).JPG","a (2300).JPG","a (2301).JPG","a (2302).JPG","a (2303).JPG","a (2304).JPG","a (2305).JPG","a (2306).JPG","a (2307).JPG","a (2308).JPG","a (2309).JPG","a (2310).JPG","a (2311).JPG","a (2312).JPG","a (2313).JPG","a (2314).JPG","a (2315).JPG","a (2316).JPG","a (2317).JPG","a (2318).JPG","a (2319).JPG","a (2320).JPG","a (2321).JPG","a (2322).JPG","a (2323).JPG","a (2324).JPG","a (2325).JPG","a (2326).JPG","a (2327).JPG","a (2328).JPG","a (2329).JPG","a (2330).JPG","a (2331).JPG","a (2332).JPG","a (2333).JPG","a (2334).JPG","a (2335) - Copia.jpg","a (2335).JPG","a (2336).JPG","a (2337).JPG","a (2338).JPG","a (2339).JPG","a (2340).JPG","a (2341).JPG","a (2342).JPG","a (2343).JPG","a (2344).JPG","a (2345).JPG","a (2346).JPG","a (2347).JPG","a (2348).JPG","a (2349).JPG","a (2350).JPG","a (2351).JPG","a (2352).JPG","a (2353).JPG","a (2354).JPG","a (2355).JPG","a (2356).JPG","a (2357).JPG","a (2358).JPG","a (2359).JPG","a (2360).JPG","a (2361).JPG","a (2362).JPG","a (2363).JPG","a (2364).JPG","a (2365).JPG","a (2366).JPG","a (2367).JPG","a (2368).JPG","a (2369).JPG","a (2370).JPG","a (2371).JPG","a (2372).JPG","a (2373).JPG","a (2374).JPG","a (2375).JPG","a (2376).JPG","a (2377).JPG","a (2378).JPG","a (2379).JPG","a (2380).JPG","a (2381).JPG","a (2382).JPG","a (2383).JPG","a (2384).JPG","a (2385).JPG","a (2386).JPG","a (2387).JPG","a (2388).JPG","a (2389).JPG","a (2390).JPG","a (2391).JPG","a (2392).JPG","a (2393).JPG","a (2394).JPG","a (2395).JPG","a (2396).JPG","a (2397).JPG","a (2398).JPG","a (2399).JPG","a (2400).JPG","a (2401).JPG","a (2402).JPG","a (2403).JPG","a (2404).JPG","a (2405).JPG","a (2406).JPG","a (2407).JPG","a (2408).JPG","a (2409).JPG","a (2410).JPG","a (2411).JPG","a (2412).JPG","a (2413).JPG","a (2414).JPG","a (2415).JPG","a (2416).JPG","a (2417).JPG","a (2418).JPG","a (2419).JPG","a (2420).JPG","a (2421).JPG","a (2422).JPG","a (2423).JPG","a (2424).JPG","a (2425).JPG","a (2426).JPG","a (2427).JPG","a (2428).JPG","a (2429).JPG","a (2430).JPG","a (2431).JPG","a (2432).JPG","a (2433).JPG","a (2434).JPG","a (2435).JPG","a (2436).JPG","a (2437).JPG","a (2438).JPG","a (2439).JPG","a (2440).JPG","a (2441).JPG","a (2442).JPG","a (2443).JPG","a (2444).JPG","a (2445).JPG","a (2446).JPG","a (2447).JPG","a (2448).JPG","a (2449).JPG","a (2450).JPG","a (2451).JPG","a (2452).JPG","a (2453).JPG","a (2454).JPG","a (2455).JPG","a (2473).JPG","a (2474).JPG","a (2475).JPG","a (2476).JPG","a (2477).JPG","a (2478).JPG","a (2479).JPG","a (2480).JPG","a (2481).JPG","a (2482).JPG","a (2483).JPG","a (2484).JPG","a (2485).JPG","a (2486).JPG","a (2487).JPG","a (2488).JPG","a (2489).JPG","a (2490).JPG","a (2491).JPG","a (2492).JPG","a (2493).JPG","a (2494).JPG","a (2495).JPG","a (2496).JPG","a (2497).JPG","a (2498).JPG","a (2499).JPG","a (2500).JPG","a (2501).JPG","a (2502).JPG","a (2503).JPG","a (2504).JPG","a (2505) - Copia.jpg","a (2505).JPG","a (2506).JPG","a (2507).JPG","a (2508).JPG","a (2509).JPG","a (2510).JPG","a (2511).JPG","a (2512).JPG","a (2513).JPG","a (2514).JPG","a (2515).JPG","a (2516).JPG","a (2517).JPG","a (2518).JPG","a (2519).JPG","a (2520).JPG","a (2521).JPG","a (2522).JPG","a (2523).JPG","a (2524).JPG","a (2525).JPG","a (2526).JPG","a (2527).JPG","a (2528).JPG","a (2529).JPG","a (2530).JPG","a (2531).JPG","a (2532).JPG","a (2533).JPG","a (2534).JPG","a (2535).JPG","a (2536).JPG","a (2537).JPG","a (2538).JPG","a (2539).JPG","a (2540).JPG","a (2541).JPG","a (2542).JPG","a (2543).JPG","a (2544).JPG","a (2545).JPG","a (2546).JPG","a (2547).JPG","a (2548).JPG","a (2549).JPG","a (2550) - Copia.jpg","a (2550).JPG","a (2551).JPG","a (2552).JPG","a (2553).JPG","a (2554).JPG","a (2555).JPG","a (2556).JPG","a (2557).JPG","a (2558).JPG","a (2559).JPG","a (2560).JPG","a (2561).JPG","a (2562).JPG","a (2563).JPG","a (2564).JPG","a (2565).JPG","a (2566).JPG","a (2567).JPG","a (2568).JPG","a (2569).JPG","a (2570).JPG","a (2571).JPG","a (2572).JPG","a (2573).JPG","a (2574).JPG","a (2575).JPG","a (2576).JPG","a (2577).JPG","a (2578).JPG","a (2579).JPG","a (2580).JPG","a (2581).JPG","a (2582).JPG","a (2583).JPG","a (2584).JPG","a (2585).JPG","a (2586).JPG","a (2587).JPG","a (2588).JPG","a (2589).JPG","a (2590).JPG","a (2591).JPG","a (2592).JPG","a (2593).JPG","a (2594).JPG","a (2595).JPG","a (2596).JPG","a (2597).JPG","a (2598).JPG","a (2599).JPG","a (2600).JPG","a (2601).JPG","a (2602).JPG","a (2603).JPG","a (2604).JPG","a (2605).JPG","a (2606).JPG","a (2607).JPG","a (2608).JPG","a (2609).JPG","a (2610).JPG","a (2611).JPG","a (2612).JPG","a (2613).JPG","a (2614).JPG","a (2615).JPG","a (2616).JPG","a (2617).JPG","a (2618).JPG","a (2619).JPG","a (2620).JPG","a (2621).JPG","a (2622).JPG","a (2623).JPG","a (2624).JPG","a (2625).JPG","a (2626).JPG","a (2627).JPG","a (2628).JPG","a (2629).JPG","a (2630).JPG","a (2631).JPG","a (2632).JPG","a (2633).JPG","a (2634).JPG","a (2635) - Copia.jpg","a (2635).JPG","a (2636).JPG","a (2637).JPG","a (2638).JPG","a (2639).JPG","a (2640).JPG","a (2641).JPG","a (2642).JPG","a (2643).JPG","a (2644).JPG","a (2645).JPG","a (2646).JPG","a (2647).JPG","a (2648).JPG","a (2649).JPG","a (2650).JPG","a (2651).JPG","a (2652).JPG","a (2653).JPG","a (2654).JPG","a (2655).JPG","a (2656).JPG","a (2657).JPG","a (2658).JPG","a (2659).JPG","a (2660).JPG","a (2661).JPG","a (2662).JPG","a (2663).JPG","a (2664).JPG","a (2665).JPG","a (2666).JPG","a (2667).JPG","a (2668).JPG","a (2669).JPG","a (2670).JPG","a (2671).JPG","a (2672).JPG","a (2673).JPG","a (2674).JPG","a (2675).JPG","a (2676).JPG","a (2677).JPG","a (2678).JPG","a (2679).JPG","a (2680).JPG","a (2681).JPG","a (2682).JPG","a (2683).JPG","a (2684).JPG","a (2685).JPG","a (2686).JPG","a (2687).JPG","a (2688).JPG","a (2689).JPG","a (2690).JPG","a (2691).JPG","a (2692).JPG"];
+];
+            const galleryMode = "pacote";
+            const storageKey = 'photo-selections';
 
-        document.addEventListener('DOMContentLoaded', (event) => {
-            const lazyImages = document.querySelectorAll('img.lazy');
-            const observer = new IntersectionObserver((entries, observer) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const lazyImage = entry.target;
-                        lazyImage.src = lazyImage.dataset.src;
-                        lazyImage.classList.remove('lazy');
-                        observer.unobserve(lazyImage);
-                    }
+            document.addEventListener('DOMContentLoaded', (event) => {
+                const lazyImages = document.querySelectorAll('img.lazy');
+                const observer = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const lazyImage = entry.target;
+                            lazyImage.src = lazyImage.dataset.src;
+                            lazyImage.classList.remove('lazy');
+                            observer.unobserve(lazyImage);
+                        }
+                    });
                 });
+                lazyImages.forEach(lazyImage => observer.observe(lazyImage));
+
+                // Carrega a seleção salva no localStorage
+                loadSelections();
             });
-            lazyImages.forEach(lazyImage => observer.observe(lazyImage));
 
-            // Carrega a seleção salva no localStorage
-            loadSelections();
-        });
-
-        function loadSelections() {
-            try {
-                const savedSelections = localStorage.getItem(storageKey);
-                if (savedSelections) {
-                    selections = JSON.parse(savedSelections);
-                    // Atualiza a interface para refletir as seleções carregadas
-                    Object.keys(selections).forEach(index => {
-                        updatePhotoGrid(index);
-                    });
-                }
-            } catch (e) {
-                console.error("Não foi possível carregar as seleções do localStorage.", e);
-            }
-        }
-
-        function saveSelectionsToLocalStorage() {
-            try {
-                localStorage.setItem(storageKey, JSON.stringify(selections));
-            } catch (e) {
-                console.error("Não foi possível salvar as seleções no localStorage.", e);
-            }
-        }
-
-        function openModal(index) {
-            document.querySelector('.modal').style.display = 'flex';
-            document.querySelectorAll('.modal-content').forEach(content => content.style.display = 'none');
-            document.getElementById('modal-' + index).style.display = 'block';
-
-            if (selections[index]) {
-                const modal = document.getElementById('modal-' + index);
-                modal.querySelector('.photo-comment').value = selections[index].comment || '';
-                if (galleryMode === 'tradicional') {
-                    modal.querySelector('.photo-quantity').value = selections[index].quantity;
-                    modal.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                        checkbox.checked = selections[index].sizes.includes(checkbox.dataset.size);
-                    });
-                }
-            }
-        }
-
-        function closeModal() {
-            document.querySelector('.modal').style.display = 'none';
-        }
-
-        function saveSelection(index) {
-            const modal = document.getElementById('modal-' + index);
-            let sizes = [];
-            let quantity = 1;
-
-            if (galleryMode === 'tradicional') {
-                sizes = Array.from(modal.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.dataset.size);
-                quantity = modal.querySelector('.photo-quantity').value;
-                if (sizes.length === 0) {
-                    alert('Você precisa selecionar pelo menos um tamanho para a foto.');
-                    return;
-                }
-            } else {
-                sizes = ['Pacote Definido'];
-                quantity = 1;
-            }
-
-            const comment = modal.querySelector('.photo-comment').value;
-
-            selections[index] = {
-                sizes: sizes,
-                quantity: quantity,
-                comment: comment,
-                fileName: fileNames[index]
-            };
-
-            closeModal();
-            updatePhotoGrid(index);
-            saveSelectionsToLocalStorage();
-        }
-
-        function removeSelection(index) {
-            delete selections[index];
-            showSummary();
-            updatePhotoGrid(index);
-            closeModal();
-            saveSelectionsToLocalStorage();
-        }
-
-        function updatePhotoGrid(index) {
-            const photoItem = document.querySelector('.photo-item[onclick="openModal('+index+')"]');
-            if(selections[index]){
-                photoItem.classList.add('selected');
-            } else {
-                photoItem.classList.remove('selected');
-            }
-        }
-
-        function showSummary() {
-            const summaryGrid = document.getElementById('summary-grid');
-            summaryGrid.innerHTML = '';
-            let hasSelections = false;
-
-            Object.entries(selections).forEach(([index, selection]) => {
-                hasSelections = true;
-                const summaryItem = document.createElement('div');
-                summaryItem.classList.add('photo-item', 'summary-item');
-
-                summaryItem.addEventListener('click', (event) => {
-                    if (!event.target.classList.contains('remove-btn')) {
-                        openModal(index);
+            function loadSelections() {
+                try {
+                    const savedSelections = localStorage.getItem(storageKey);
+                    if (savedSelections) {
+                        selections = JSON.parse(savedSelections);
+                        // Atualiza a interface para refletir as seleções carregadas
+                        Object.keys(selections).forEach(index => {
+                            updatePhotoGrid(index);
+                        });
                     }
-                });
+                } catch (e) {
+                    console.error("Não foi possível carregar as seleções do localStorage.", e);
+                }
+            }
 
-                let summaryInfoHtml = '';
+            function saveSelectionsToLocalStorage() {
+                try {
+                    localStorage.setItem(storageKey, JSON.stringify(selections));
+                } catch (e) {
+                    console.error("Não foi possível salvar as seleções no localStorage.", e);
+                }
+            }
+
+            function openModal(index) {
+                document.querySelector('.modal').style.display = 'flex';
+                document.querySelectorAll('.modal-content').forEach(content => content.style.display = 'none');
+                document.getElementById('modal-' + index).style.display = 'block';
+
+                if (selections[index]) {
+                    const modal = document.getElementById('modal-' + index);
+                    modal.querySelector('.photo-comment').value = selections[index].comment || '';
+                    if (galleryMode === 'tradicional') {
+                        modal.querySelector('.photo-quantity').value = selections[index].quantity;
+                        modal.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                            checkbox.checked = selections[index].sizes.includes(checkbox.dataset.size);
+                        });
+                    }
+                }
+            }
+
+            function closeModal() {
+                document.querySelector('.modal').style.display = 'none';
+            }
+
+            function saveSelection(index) {
+                const modal = document.getElementById('modal-' + index);
+                let sizes = [];
+                let quantity = 1;
+
                 if (galleryMode === 'tradicional') {
-                    summaryInfoHtml = `
-                        <div class="summary-info">
-                            <p><strong>Tamanhos:</strong> ${selection.sizes.join(', ')}</p>
-                            <p><strong>Quantidade:</strong> ${selection.quantity}</p>
-                            ${selection.comment ? `<p><strong>Comentário:</strong> ${selection.comment}</p>` : ''}
-                            <button class="remove-btn" onclick="removeSelection(${index})">Remover</button>
+                    sizes = Array.from(modal.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.dataset.size);
+                    quantity = modal.querySelector('.photo-quantity').value;
+                    if (sizes.length === 0) {
+                        alert('Você precisa selecionar pelo menos um tamanho para a foto.');
+                        return;
+                    }
+                } else {
+                    sizes = ['Pacote Definido'];
+                    quantity = 1;
+                }
+
+                const comment = modal.querySelector('.photo-comment').value;
+
+                selections[index] = {
+                    sizes: sizes,
+                    quantity: quantity,
+                    comment: comment,
+                    fileName: fileNames[index]
+                };
+
+                closeModal();
+                updatePhotoGrid(index);
+                saveSelectionsToLocalStorage();
+            }
+
+            function removeSelection(index) {
+                delete selections[index];
+                showSummary();
+                updatePhotoGrid(index);
+                closeModal();
+                saveSelectionsToLocalStorage();
+            }
+
+            function updatePhotoGrid(index) {
+                const photoItem = document.querySelector('.photo-item[onclick="openModal('+index+')"]');
+                if(selections[index]){
+                    photoItem.classList.add('selected');
+                } else {
+                    photoItem.classList.remove('selected');
+                }
+            }
+
+            function showSummary() {
+                const summaryGrid = document.getElementById('summary-grid');
+                summaryGrid.innerHTML = '';
+                let hasSelections = false;
+
+                Object.entries(selections).forEach(([index, selection]) => {
+                    hasSelections = true;
+                    const summaryItem = document.createElement('div');
+                    summaryItem.classList.add('photo-item', 'summary-item');
+
+                    summaryItem.addEventListener('click', (event) => {
+                        if (!event.target.classList.contains('remove-btn')) {
+                            openModal(index);
+                        }
+                    });
+
+                    let summaryInfoHtml = '';
+                    if (galleryMode === 'tradicional') {
+                        summaryInfoHtml = `
+                            <div class="summary-info">
+                                <p><strong>Tamanhos:</strong> ${selection.sizes.join(', ')}</p>
+                                <p><strong>Quantidade:</strong> ${selection.quantity}</p>
+                                ${selection.comment ? `<p><strong>Comentário:</strong> ${selection.comment}</p>` : ''}
+                                <button class="remove-btn" onclick="removeSelection(${index})">Remover</button>
+                            </div>
+                        `;
+                    } else { // Modo pacote
+                         summaryInfoHtml = `
+                            <div class="summary-info">
+                                ${selection.comment ? `<p><strong>Comentário:</strong> ${selection.comment}</p>` : ''}
+                                <button class="remove-btn" onclick="removeSelection(${index})">Remover</button>
+                            </div>
+                         `;
+                    }
+
+                    summaryItem.innerHTML = `
+                        <div class="summary-img-container">
+                           <img src="fotos/${selection.fileName}" alt="${selection.fileName}">
+                        </div>
+                        <div class="summary-details">
+                            <p class="filename">${selection.fileName}</p>
+                            ${summaryInfoHtml}
                         </div>
                     `;
-                } else { // Modo pacote
-                     summaryInfoHtml = `
-                        <div class="summary-info">
-                            ${selection.comment ? `<p><strong>Comentário:</strong> ${selection.comment}</p>` : ''}
-                            <button class="remove-btn" onclick="removeSelection(${index})">Remover</button>
-                        </div>
-                     `;
+                    summaryGrid.appendChild(summaryItem);
+                });
+
+                if(!hasSelections){
+                    summaryGrid.innerHTML = '<p style="text-align: center;">Nenhuma foto selecionada ainda.</p>';
+                }
+            }
+
+            function goToSummary() {
+                document.getElementById('main-gallery').style.display = 'none';
+                document.getElementById('summary-page').style.display = 'block';
+                showSummary();
+            }
+
+            function backToGallery() {
+                document.getElementById('main-gallery').style.display = 'block';
+                document.getElementById('summary-page').style.display = 'none';
+            }
+
+
+            function finishSelection() {
+                let report = '';
+                let selectedFileNames = [];
+                let hasSelections = false;
+
+                Object.entries(selections).forEach(([index, selection]) => {
+                    hasSelections = true;
+                    selectedFileNames.push('"' + selection.fileName.replace(/\.[^/.]+$/, "") + '"');
+                });
+
+                if (!hasSelections) {
+                    alert('Você precisa selecionar pelo menos uma foto antes de enviar.');
+                    return;
                 }
 
-                summaryItem.innerHTML = `
-                    <div class="summary-img-container">
-                       <img src="fotos/${selection.fileName}" alt="${selection.fileName}">
-                    </div>
-                    <div class="summary-details">
-                        <p class="filename">${selection.fileName}</p>
-                        ${summaryInfoHtml}
-                    </div>
-                `;
-                summaryGrid.appendChild(summaryItem);
-            });
+                if (galleryMode === 'tradicional') {
+                    report = '*Olá! Gostaria de enviar meu pedido de fotos.*\n_Por favor, não apague o relatório abaixo._\n\n';
+                    Object.entries(selections).forEach(([index, selection]) => {
+                        report += 'Foto: ' + selection.fileName + '\n';
+                        report += '- Tamanhos: ' + selection.sizes.join(', ') + '\n';
+                        report += '- Quantidade: ' + selection.quantity + '\n';
+                        if (selection.comment) {
+                            report += '- Comentário: ' + selection.comment + '\n';
+                        }
+                        report += '\n';
+                    });
+                } else if (galleryMode === 'pacote') {
+                    report = '*Olá! Gostaria de enviar meu pedido de fotos.*\n_Por favor, não apague o relatório abaixo._\n\n';
+                }
 
-            if(!hasSelections){
-                summaryGrid.innerHTML = '<p style="text-align: center;">Nenhuma foto selecionada ainda.</p>';
+                report += '*Total de fotos escolhidas:* ' + selectedFileNames.length + '\n\n';
+                report += '*Lista das fotos escolhidas para separação:*\n';
+                report += selectedFileNames.join(' OR ');
+
+                const whatsappNumber = '5542998370150';
+                const encodedReport = encodeURIComponent(report);
+                window.open('https://wa.me/' + whatsappNumber + '?text=' + encodedReport);
             }
-        }
-
-        function goToSummary() {
-            document.getElementById('main-gallery').style.display = 'none';
-            document.getElementById('summary-page').style.display = 'block';
-            showSummary();
-        }
-
-        function backToGallery() {
-            document.getElementById('main-gallery').style.display = 'block';
-            document.getElementById('summary-page').style.display = 'none';
-        }
-
-
-        function finishSelection() {
-            let report = '';
-            let selectedFileNames = [];
-            let hasSelections = false;
-
-            Object.entries(selections).forEach(([index, selection]) => {
-                hasSelections = true;
-                selectedFileNames.push('"' + selection.fileName.replace(/\.[^/.]+$/, "") + '"');
-            });
-
-            if (!hasSelections) {
-                alert('Você precisa selecionar pelo menos uma foto antes de enviar.');
-                return;
-            }
-
-            if (galleryMode === 'tradicional') {
-                report = '*Olá! Gostaria de enviar meu pedido de fotos.*\\n_Por favor, não apague o relatório abaixo._\\n\\n';
-                Object.entries(selections).forEach(([index, selection]) => {
-                    report += 'Foto: ' + selection.fileName + '\\n';
-                    report += '- Tamanhos: ' + selection.sizes.join(', ') + '\\n';
-                    report += '- Quantidade: ' + selection.quantity + '\\n';
-                    if (selection.comment) {
-                        report += '- Comentário: ' + selection.comment + '\\n';
-                    }
-                    report += '\\n';
-                });
-            } else if (galleryMode === 'pacote') {
-                report = '*Olá! Gostaria de enviar meu pedido de fotos.*\\n_Por favor, não apague o relatório abaixo._\\n\\n';
-            }
-
-            report += '*Total de fotos escolhidas:* ' + selectedFileNames.length + '\\n\\n';
-            report += '*Lista das fotos escolhidas para separação:*\\n';
-            report += selectedFileNames.join(' OR ');
-
-            const whatsappNumber = '5542998370150';
-            const encodedReport = encodeURIComponent(report);
-            window.open('https://wa.me/' + whatsappNumber + '?text=' + encodedReport);
-        }
-    </script>
-</head>
-<body>
-    <div id="main-gallery">
-        <div class="header">
-            <h1>Selecione suas fotos</h1>
-            <p>Clique em cada foto para escolher as opções.</p>
-        </div>
-
-        <div class="photo-grid">
+        </script></head><body><div id="main-gallery"><div class="header"><h1>Selecione suas fotos</h1><p>Clique em cada foto para escolher as opções.</p></div><div class="photo-grid"><div class="photo-item" onclick="openModal(0)"><img data-src="fotos/a (1).JPG" alt="a (1).JPG" class="lazy"><p class="filename">a (1).JPG</p></div><div class="photo-item" onclick="openModal(1)"><img data-src="fotos/a (2).JPG" alt="a (2).JPG" class="lazy"><p class="filename">a (2).JPG</p></div><div class="photo-item" onclick="openModal(2)"><img data-src="fotos/a (3).JPG" alt="a (3).JPG" class="lazy"><p class="filename">a (3).JPG</p></div><div class="photo-item" onclick="openModal(3)"><img data-src="fotos/a (4).JPG" alt="a (4).JPG" class="lazy"><p class="filename">a (4).JPG</p></div><div class="photo-item" onclick="openModal(4)"><img data-src="fotos/a (5).JPG" alt="a (5).JPG" class="lazy"><p class="filename">a (5).JPG</p></div><div class="photo-item" onclick="openModal(5)"><img data-src="fotos/a (6).JPG" alt="a (6).JPG" class="lazy"><p class="filename">a (6).JPG</p></div></div><div class="modal"><div id="modal-0" class="modal-content"><span class="close-btn" onclick="closeModal()">×</span><img src="fotos/a (1).JPG" alt="a (1).JPG"><div class="options"><p>Opções para a foto: <strong>a (1).JPG</strong></p><p class="package-info">Opções definidas pelo pacote. Apenas adicione um comentário, se desejar.</p><p>Comentário:</p><textarea class="photo-comment" placeholder="Ex: 'Tirar a mancha no fundo'"></textarea><button class="save-btn" onclick="saveSelection(0)">Selecionar Foto</button></div></div><div id="modal-1" class="modal-content"><span class="close-btn" onclick="closeModal()">×</span><img src="fotos/a (2).JPG" alt="a (2).JPG"><div class="options"><p>Opções para a foto: <strong>a (2).JPG</strong></p><p class="package-info">Opções definidas pelo pacote. Apenas adicione um comentário, se desejar.</p><p>Comentário:</p><textarea class="photo-comment" placeholder="Ex: 'Tirar a mancha no fundo'"></textarea><button class="save-btn" onclick="saveSelection(1)">Selecionar Foto</button></div></div><div id="modal-2" class="modal-content"><span class="close-btn" onclick="closeModal()">×</span><img src="fotos/a (3).JPG" alt="a (3).JPG"><div class="options"><p>Opções para a foto: <strong>a (3).JPG</strong></p><p class="package-info">Opções definidas pelo pacote. Apenas adicione um comentário, se desejar.</p><p>Comentário:</p><textarea class="photo-comment" placeholder="Ex: 'Tirar a mancha no fundo'"></textarea><button class="save-btn" onclick="saveSelection(2)">Selecionar Foto</button></div></div><div id="modal-3" class="modal-content"><span class="close-btn" onclick="closeModal()">×</span><img src="fotos/a (4).JPG" alt="a (4).JPG"><div class="options"><p>Opções para a foto: <strong>a (4).JPG</strong></p><p class="package-info">Opções definidas pelo pacote. Apenas adicione um comentário, se desejar.</p><p>Comentário:</p><textarea class="photo-comment" placeholder="Ex: 'Tirar a mancha no fundo'"></textarea><button class="save-btn" onclick="saveSelection(3)">Selecionar Foto</button></div></div><div id="modal-4" class="modal-content"><span class="close-btn" onclick="closeModal()">×</span><img src="fotos/a (5).JPG" alt="a (5).JPG"><div class="options"><p>Opções para a foto: <strong>a (5).JPG</strong></p><p class="package-info">Opções definidas pelo pacote. Apenas adicione um comentário, se desejar.</p><p>Comentário:</p><textarea class="photo-comment" placeholder="Ex: 'Tirar a mancha no fundo'"></textarea><button class="save-btn" onclick="saveSelection(4)">Selecionar Foto</button></div></div><div id="modal-5" class="modal-content"><span class="close-btn" onclick="closeModal()">×</span><img src="fotos/a (6).JPG" alt="a (6).JPG"><div class="options"><p>Opções para a foto: <strong>a (6).JPG</strong></p><p class="package-info">Opções definidas pelo pacote. Apenas adicione um comentário, se desejar.</p><p>Comentário:</p><textarea class="photo-comment" placeholder="Ex: 'Tirar a mancha no fundo'"></textarea><button class="save-btn" onclick="saveSelection(5)">Selecionar Foto</button></div></div></div><button class="finish-btn" onclick="goToSummary()">Finalizar e Ver Resumo</button></div>
+            <div id="summary-page" style="display: none;">
+                <div class="header">
+                    <h2>Resumo do Pedido</h2>
+                    <p>Clique nas fotos para editar. Clique no botão de baixo para enviar o pedido.</p>
+                </div>
+                <div id="summary-grid" class="photo-grid"></div>
+                <div class="summary-actions">
+                    <button class="edit-btn" onclick="backToGallery()">Editar Tudo</button>
+                    <button class="finish-btn" onclick="finishSelection()">Finalizar e Enviar para o Fotógrafo</button>
+                </div>
             </div>
-
-        <div class="modal">
-            </div>
-
-        <button class="finish-btn" onclick="goToSummary()">Finalizar e Ver Resumo</button>
-    </div>
-
-    <div id="summary-page" style="display: none;">
-        <div class="header">
-            <h2>Resumo do Pedido</h2>
-            <p>Clique nas fotos para editar. Clique no botão de baixo para enviar o pedido.</p>
-        </div>
-        <div id="summary-grid" class="photo-grid"></div>
-        <div class="summary-actions">
-            <button class="edit-btn" onclick="backToGallery()">Editar Tudo</button>
-            <button class="finish-btn" onclick="finishSelection()">Finalizar e Enviar para o Fotógrafo</button>
-        </div>
-    </div>
-</body>
-</html>
+        </body></html>
